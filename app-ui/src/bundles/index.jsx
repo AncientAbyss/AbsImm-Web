@@ -10,3 +10,7 @@ export const auth = store => loadable(() =>
   import(/* webpackChunkName: "auth" */ './Auth').then(bundle => bundle.default(store)), {
   LoadingComponent: () => <Preloader />,
 });
+export const story = store => loadable(() =>
+  import(/* webpackChunkName: "story" */ './Story').then(bundle => bundle.default(store)), {
+  LoadingComponent: () => <Preloader />,
+});

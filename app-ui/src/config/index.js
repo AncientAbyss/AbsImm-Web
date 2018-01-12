@@ -15,6 +15,9 @@ const config = {
     admin: {
       index: '/admin',
     },
+    story: {
+      index: '/story',
+    },
   },
 };
 

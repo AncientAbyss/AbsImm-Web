@@ -46,7 +46,8 @@ class App extends React.Component<Props> {
             <Router history={history}>
               <CaptureNotFoundRoute>
                 <Switch>
-                  <Redirect exact from="/" to="/admin" />
+                  <Redirect exact from="/" to="/story" />
+                  <Route path="/story" component={secured(Bundles.story(store))} />
                   <Route path="/admin" component={secured(Bundles.admin(store))} />
                   <Route path="/auth" component={unsecured(Bundles.auth(store))} />
                   <NotFoundRoute />

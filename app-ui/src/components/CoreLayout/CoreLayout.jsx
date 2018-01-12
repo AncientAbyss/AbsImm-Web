@@ -21,6 +21,7 @@ export default ({ children }: Props) => (
     <Switch>
       <Route path="/auth" component={UnauthenticatedContainer} />
       <Route path="/admin" component={AuthenticatedContainer} />
+      <Route path="/story" component={AuthenticatedContainer} />
     </Switch>
     {children}
     <Alert
