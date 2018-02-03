@@ -14,13 +14,15 @@ type Props = {
     action: FormProps,
     isPending: boolean,
     i18n: Object,
-    onReset: (data: Object) => any,
+    onSubmitAction: (data: Object) => any,
     $form: FormProps,
+    data: Array,
 }
 
-export const DashboardComponent = ({action, isPending, i18n, onReset, $form,}: Props) => (
-<Panel className="story" header={i18n.t`Your action`}>
-<Form model={modelPath} onSubmit={data => onReset(data)} autoComplete="off">
+export const DashboardComponent = ({action, isPending, i18n, onSubmitAction, $form, data}: Props) => (
+<Panel className="dashboard" header={i18n.t`AbsImm`}>
+    {data.map((text, i) => <div key={i}>{text}</div>)}
+<Form model={modelPath} onSubmit={data => onSubmitAction(data)} autoComplete="off">
     <FormControl
         id="action"
         formProps={action}

@@ -1,6 +1,6 @@
 // @flow
 import { combineReducers } from 'redux';
-import { createAction, handleActions } from 'redux-actions';
+import { createAction, handleActions, handleAction } from 'redux-actions';
 import { formReducer, modelReducer } from 'react-redux-form';
 
 export type RequestState = {
@@ -30,4 +30,7 @@ export default combineReducers({
   }, requestState),
   form: formReducer(modelPath, formState),
   data: modelReducer(modelPath, formState),
+  story: handleAction(actionFulfilled, (state, action) => ({
+    data: [...state.data, action.payload.description]
+  }), {data: []})
 });

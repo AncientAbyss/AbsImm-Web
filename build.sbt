@@ -71,11 +71,19 @@ val admin: Project = Project(id = "app-admin", base = file("app-admin"))
   .disablePlugins(PlayLayoutPlugin)
 
 ////*******************************
+//// Story module
+////*******************************
+val story: Project = Project(id = "app-story", base = file("app-story"))
+  .dependsOn(auth % "compile->compile;test->test", test % Test)
+  .enablePlugins(PlayScala, DisablePackageSettings)
+  .disablePlugins(PlayLayoutPlugin)
+
+////*******************************
 //// Root module
 ////*******************************
 val root: Project = Project(id = "silhouette-play-react-seed", base = file("."))
-  .aggregate(test, core, auth, admin)
-  .dependsOn(auth, admin)
+  .aggregate(test, core, auth, admin, story)
+  .dependsOn(auth, admin, story)
   .settings(
     libraryDependencies ++= Seq(
       filters

@@ -14,6 +14,7 @@ import Dashboard from 'bundles/Story/components/Dashboard';
 const mapStateToProps = (state, ownProps) => ({
   ...state.story.dashboard.form,
   ...state.story.dashboard.request,
+  ...state.story.dashboard.story,
 });
 
 /**
@@ -24,7 +25,7 @@ const mapStateToProps = (state, ownProps) => ({
  * @returns {Object} The props passed to the react component.
  */
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  onReset: (data) => dispatch(action({ data })),
+  onSubmitAction: (data) => dispatch(action({ data })),
 //  componentWillMount: () => dispatch(TODO: validate?),
   componentWillUnmount: () => dispatch(actions.reset(modelPath)),
 });
