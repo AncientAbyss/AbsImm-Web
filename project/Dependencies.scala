@@ -1,4 +1,5 @@
 import sbt._
+import sbt.librarymanagement.MavenRepository
 
 object Dependencies {
 
@@ -9,7 +10,8 @@ object Dependencies {
   }
 
   val resolvers = Seq(
-    Resolver.jcenterRepo
+    Resolver.jcenterRepo,
+    MavenRepository("ancientabyss", "http://rod.bplaced.net/maven2")
   )
 
   object Library {
@@ -49,5 +51,6 @@ object Dependencies {
     val apacheCommonsIO: ModuleID = "commons-io" % "commons-io" % "2.4"
     val playReactiveMongo: ModuleID = "org.reactivemongo" %% "play2-reactivemongo" % "0.12.6-play26"
     val embedMongo: ModuleID = "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "2.0.0"
+    val absimm: ModuleID = "net.ancientabyss.absimm" % "absimm-core" % "0.5-SNAPSHOT"
   }
 }

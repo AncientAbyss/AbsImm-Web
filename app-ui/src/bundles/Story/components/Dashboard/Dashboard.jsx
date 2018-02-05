@@ -21,7 +21,7 @@ type Props = {
 
 export const DashboardComponent = ({action, isPending, i18n, onSubmitAction, $form, data}: Props) => (
 <Panel className="dashboard" header={i18n.t`AbsImm`}>
-    {data.map((text, i) => <div key={i}>{text}</div>)}
+    {data.map((text, i) => <div key={i} dangerouslySetInnerHTML={{__html: text + "<hr/>"}} ></div>)}
 <Form model={modelPath} onSubmit={data => onSubmitAction(data)} autoComplete="off">
     <FormControl
         id="action"

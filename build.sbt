@@ -2,6 +2,8 @@ import Dependencies.Library
 import play.sbt.{ PlayLayoutPlugin, PlayScala }
 import sbt._
 
+inThisBuild(Seq(updateOptions := updateOptions.value.withGigahorse(false)))
+
 ////*******************************
 //// Test module
 ////*******************************
@@ -77,6 +79,13 @@ val story: Project = Project(id = "app-story", base = file("app-story"))
   .dependsOn(auth % "compile->compile;test->test", test % Test)
   .enablePlugins(PlayScala, DisablePackageSettings)
   .disablePlugins(PlayLayoutPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      Library.Silhouette.core,
+      ehcache,
+      Library.Play.cache,
+      Library.absimm
+    ))
 
 ////*******************************
 //// Root module
