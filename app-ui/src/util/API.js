@@ -21,14 +21,24 @@ export class APIResponse {
 
 /**
  * An API error that can transport an `APIResponse`.
+ *
+ * Works with Babel6 and instanceof.
+ * @see https://stackoverflow.com/a/46971044/2153190
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  */
-export class APIError extends Error {
+export class APIError {
+  name: string;
+  message: string;
+  stack: string;
   response: APIResponse;
   constructor(response: APIResponse) {
-    super(response.description);
     this.response = response;
+    this.name = this.constructor.name;
+    this.message = response.description;
+    this.stack = (new Error(response.description)).stack;
   }
 }
+Object.setPrototypeOf(APIError, Error);
 
 /**
  * Provides helpers for the API implementations.
@@ -79,13 +89,17 @@ export default class API {
   /**
    * Executes a request with a application/x-www-form-urlencoded or multipart/form-data body.
    *
+   * The `Content-Type` headers will automatically be added based on the passed content:
+   * - URLSearchParams -> application/x-www-form-urlencoded
+   * - FormData -> multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+   *
    * @param route  The API route.
    * @param body   The body to post.
    * @param method The request method.
    * @return A resolved or rejected promise.
    * @see http://www.redotheweb.com/2015/11/09/api-security.html
    */
-  formRequest(route: string, body: *, method: string = 'POST'): Promise<Response> {
+  formRequest(route: string, body: URLSearchParams | FormData, method: string = 'POST'): Promise<Response> {
     return this.statusHandler(fetch(`${config.apiBaseUrl}/${route}`, {
       method,
       headers: {

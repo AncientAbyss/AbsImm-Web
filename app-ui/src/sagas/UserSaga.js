@@ -1,34 +1,48 @@
 // @flow
-import Alert from 'react-s-alert';
-import { call, put, take, all } from 'redux-saga/effects';
-import { initApp } from 'modules/AppModule';
+import { delay } from 'redux-saga';
+import { call, put, take, race, all } from 'redux-saga/effects';
 import { history } from 'modules/LocationModule';
 import { resetState } from 'modules/StateModule';
-import { initUser, fetchUser, saveUser, deleteUser, signOutUser, resetUserState } from 'modules/UserModule';
-import { combineSagas } from 'util/Saga';
+import {
+  fetchUser,
+  fetchUserPending,
+  fetchUserFulfilled,
+  fetchUserRejected,
+  signOutUser,
+  resetUserState,
+} from 'modules/UserModule';
+import { combineSagas, handleError } from 'util/Saga';
 import UserAPI from 'apis/UserAPI';
 import config from 'config/index';
 
-export function* fetchUserTask(api: UserAPI): Generator<*, *, *> {
-  try {
-    const response = yield call([api, api.get]);
-    yield put(saveUser(response.details));
-  } catch (e) {
-    yield put(deleteUser());
-    yield put(resetUserState());
-  }
-}
-
-export function* initUserWorker(api: UserAPI): Generator<*, *, *> {
-  while (yield take(initApp().type)) {
-    yield call(fetchUserTask, api);
-    yield put(initUser());
-  }
-}
-
 export function* fetchUserWorker(api: UserAPI): Generator<*, *, *> {
   while (yield take(fetchUser().type)) {
-    yield call(fetchUserTask, api);
+    try {
+      yield put(fetchUserPending());
+      const response = yield call([api, api.get]);
+      const user = response.details;
+      yield put(fetchUserFulfilled(user));
+    } catch (e) {
+      yield put(resetUserState());
+      yield put(fetchUserRejected(e));
+    }
+  }
+}
+
+export function* fetchUserPeriodicallyWorker(duration: number): Generator<*, *, *> {
+  while (yield take(fetchUserFulfilled().type)) {
+    while (true) {
+      const { stop } = yield race({
+        stop: take(resetUserState().type),
+        tick: call(delay, duration),
+      });
+
+      if (stop) {
+        break;
+      }
+
+      yield put(fetchUser());
+    }
   }
 }
 
@@ -36,22 +50,15 @@ export function* signOutUserWorker(api: UserAPI): Generator<*, *, *> {
   while (yield take(signOutUser().type)) {
     try {
       yield call([api, api.signOut]);
-      yield put(deleteUser());
       yield put(resetUserState());
       yield call(history.push, config.route.auth.signIn);
     } catch (e) {
-      switch (e.response.code) {
-        case 'auth.unauthorized': {
-          yield put(deleteUser());
-          yield put(resetUserState());
-          yield call(history.push, config.route.auth.signIn);
-          break;
-        }
-
-        default:
-          yield call(Alert.error, e.response.description);
-          break;
-      }
+      yield all(handleError(e, {
+        'auth.unauthorized': () => ([
+          put(resetUserState()),
+          call(history.push, config.route.auth.signIn),
+        ]),
+      }));
     }
   }
 }
@@ -65,8 +72,8 @@ export function* resetUserStateWorker(): Generator<*, *, *> {
 
 export function* userSaga(api: UserAPI): Generator<*, *, *> {
   yield all(combineSagas([
-    [initUserWorker, api],
     [fetchUserWorker, api],
+    [fetchUserPeriodicallyWorker, 5 * 60 * 1000],
     [signOutUserWorker, api],
     [resetUserStateWorker],
   ]));

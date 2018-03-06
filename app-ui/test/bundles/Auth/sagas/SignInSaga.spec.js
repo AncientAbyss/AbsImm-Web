@@ -4,7 +4,7 @@ import { actions } from 'react-redux-form';
 import { expectSaga } from 'redux-saga-test-plan';
 import { APIResponse, APIError } from 'util/API';
 import { history } from 'modules/LocationModule';
-import { saveUser } from 'modules/UserModule';
+import { fetchUserFulfilled } from 'modules/UserModule';
 import { saveActivationEmail } from 'bundles/Auth/modules/ActivateAccountModule';
 import saga, { signInSaga } from 'bundles/Auth/sagas/SignInSaga';
 import {
@@ -44,7 +44,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .put(signInPending())
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should set the state to fulfilled if the call to the API was successful', () => {
@@ -52,7 +52,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .put(signInFulfilled(successResponse))
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should set the state to rejected if the call to the API failed', () => {
@@ -60,7 +60,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .put(signInRejected(fatalError))
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should call the `signIn` method of the API', () => {
@@ -68,15 +68,15 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .call([api, api.signIn], payload)
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should save the user on success', () => {
       const api = { signIn: () => successResponse };
       return expectSaga(signInSaga, api)
-        .put(saveUser(successResponse.details))
+        .put(fetchUserFulfilled(successResponse.details))
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should reset the form on success', () => {
@@ -84,7 +84,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .put(actions.reset(modelPath))
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should route to the index page on success', () => {
@@ -92,7 +92,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .call(history.push, config.route.index)
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should handle an invalid form', () => {
@@ -100,7 +100,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .put(actions.setErrors(`${modelPath}.${formError.key}`, formError.message))
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should handle an inactive account', () => {
@@ -109,7 +109,7 @@ describe('(Saga) Auth/SignInSaga', () => {
         .put(saveActivationEmail(inactiveAccountError.response.details.email))
         .call(history.push, config.route.auth.accountActivation)
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
 
     it('Should display the error alert box on error', () => {
@@ -117,7 +117,7 @@ describe('(Saga) Auth/SignInSaga', () => {
       return expectSaga(signInSaga, api)
         .call(Alert.error, fatalError.response.description)
         .dispatch(signIn(payload))
-        .run({ silenceTimeout: true });
+        .silentRun();
     });
   });
 });
