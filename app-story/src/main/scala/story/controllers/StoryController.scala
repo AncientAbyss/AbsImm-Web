@@ -12,6 +12,7 @@ import net.ancientabyss.absimm.parser.TxtParser
 import play.api.cache.SyncCacheApi
 import play.api.i18n.Messages
 import play.api.mvc.{ Action, AnyContent, ControllerComponents }
+import reactivemongo.bson.BSONObjectID
 import story.forms.ActionForm
 
 import scala.collection.JavaConverters._
@@ -25,8 +26,8 @@ class StoryController @Inject() (
 ) extends ApiController {
 
   def init(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    cache.remove("story")
-    Future.successful(Ok(ApiResponse("story.init.successfull", getResponse(getStory))))
+    cache.remove(getCacheName(request.identity.id))
+    Future.successful(Ok(ApiResponse("story.init.successfull", getResponse(getStory(request.identity.id)))))
   }
 
   def action(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
@@ -35,7 +36,7 @@ class StoryController @Inject() (
         ApiResponse("story.action.form.invalid", Messages("invalid.form"), form.errors)
       )),
       data => {
-        val story: (Story, DefaultHistory) = getStory
+        val story: (Story, DefaultHistory) = getStory(request.identity.id)
         if (!data.action.isEmpty) {
           story._1.interact(data.action)
         }
@@ -62,10 +63,14 @@ class StoryController @Inject() (
     (story, history)
   }
 
-  private def getStory: (Story, DefaultHistory) = {
-    val story = cache.getOrElseUpdate("story") { // TODO: cache per user
+  private def getStory(userID: BSONObjectID): (Story, DefaultHistory) = {
+    val story = cache.getOrElseUpdate(getCacheName(userID)) {
       initStory()
     }
     story
+  }
+
+  private def getCacheName(userID: BSONObjectID) = {
+    "story_" + userID
   }
 }
