@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { actions } from 'react-redux-form';
 import lifecycle from 'components/Lifecycle';
-import { modelPath, action } from 'bundles/Story/modules/DashboardModule';
+import { modelPath, action, init } from 'bundles/Story/modules/DashboardModule';
 import Dashboard from 'bundles/Story/components/Dashboard';
 
 /**
@@ -26,7 +26,7 @@ const mapStateToProps = (state, ownProps) => ({
  */
 const mapDispatchToProps = (dispatch, ownProps) => ({
   onSubmitAction: (data) => dispatch(action({ data })),
-//  componentWillMount: () => dispatch(TODO: validate?),
+  componentWillMount: () => dispatch(init()),
   componentWillUnmount: () => dispatch(actions.reset(modelPath)),
 });
 

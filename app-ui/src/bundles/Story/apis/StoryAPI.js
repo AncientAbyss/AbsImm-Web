@@ -7,4 +7,9 @@ export default class StoryAPI extends API {
     const response = await this.jsonRequest(`api/story/action`, data);
     return response.json();
   }
+
+  async init(): Promise<APIResponse> {
+    const response = await this.jsonRequest(`api/story/init`);
+    return response.json();
+  }
 }

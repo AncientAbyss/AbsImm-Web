@@ -7,6 +7,7 @@ import { history } from 'modules/LocationModule';
 import {
   modelPath,
   action,
+  init,
   actionPending,
   actionFulfilled,
   actionRejected,
@@ -21,7 +22,7 @@ export function* dashboardWorker(api: StoryAPI): Generator<*, *, *> {
       const response = yield call([api, api.action], data);
       yield put(actionFulfilled(response));
       yield put(actions.reset(modelPath));
-      yield call(Alert.success, response.description);
+      // yield call(Alert.success, response.description); // no alert needed on success
     } catch (e) {
       yield put(actionRejected(e));
       switch (e.response.code) {
@@ -37,9 +38,26 @@ export function* dashboardWorker(api: StoryAPI): Generator<*, *, *> {
   }
 }
 
+export function* initWorker(api: StoryAPI): Generator<*, *, *> {
+    while (true) {
+        yield take(init().type);
+        try {
+            const response = yield call([api, api.init]);
+            yield put(actionFulfilled(response));
+        } catch (e) {
+            yield put(actionRejected(e));
+            switch (e.response.code) {
+                default:
+                    yield call(Alert.error, e.response.description);
+            }
+        }
+    }
+}
+
 export function* dashboardSaga(api: StoryAPI): Generator<*, *, *> {
   yield all(combineSagas([
     [dashboardWorker, api],
+    [initWorker, api],
   ]));
 }
 

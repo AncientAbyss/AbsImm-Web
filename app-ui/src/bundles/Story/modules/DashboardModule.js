@@ -17,6 +17,7 @@ export const formState: DashboardForm = {
   action: '',
 };
 
+export const init = createAction('STORY_INIT');
 export const action = createAction('STORY_ACTION');
 export const actionPending = createAction('STORY_ACTION_PENDING');
 export const actionFulfilled = createAction('STORY_ACTION_FULFILLED');
