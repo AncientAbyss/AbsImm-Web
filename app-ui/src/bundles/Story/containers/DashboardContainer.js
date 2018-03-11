@@ -3,6 +3,7 @@ import { actions } from 'react-redux-form';
 import lifecycle from 'components/Lifecycle';
 import { modelPath, action, init } from 'bundles/Story/modules/DashboardModule';
 import Dashboard from 'bundles/Story/components/Dashboard';
+import * as Scroll from "react-scroll";
 
 /**
  * Maps the state properties to the React component `props`.
@@ -25,7 +26,7 @@ const mapStateToProps = (state, ownProps) => ({
  * @returns {Object} The props passed to the react component.
  */
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  onSubmitAction: (data) => dispatch(action({ data })),
+  onSubmitAction: (data) => {dispatch(action({ data })); Scroll.animateScroll.scrollToBottom();},
   componentWillMount: () => dispatch(init()),
   componentWillUnmount: () => dispatch(actions.reset(modelPath)),
 });
